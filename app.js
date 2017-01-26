@@ -4,6 +4,8 @@ function App() {
   var buttons = [];
   var classifier = new Classifier();
   var drawIsolines = false;
+  var WIDTH = -1;
+  var HEIGHT = -1;
 
   this.Start = function()
   {
@@ -13,7 +15,10 @@ function App() {
 
     document.getElementById("isolines").onclick = OnCheckBoxClickCB;
 
-    buttons.push(new Button(vec2.fromValues(Width() - 100, 20), "Reset", GetContext, Reset))
+    buttons.push(new Button(vec2.fromValues(WIDTH - 100, 20), "Reset", GetContext, Reset))
+
+    WIDTH = Width();
+    HEIGHT = Height();
 
     Draw();
   }
@@ -29,7 +34,7 @@ function App() {
   {
     var ctx = GetContext();    
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, Width(), Height());
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
   }
 
   function DrawOverlay()
@@ -81,21 +86,21 @@ function App() {
       var drawBuffer = fillIsoLevels(drawBuffer);
     }
 
-    GetContext().putImageData(new ImageData(drawBuffer, Width(), Height()), 0, 0);
+    GetContext().putImageData(new ImageData(drawBuffer, WIDTH, HEIGHT), 0, 0);
     DrawOverlay();
     timer.End();
   }
 
   function fillClassifierResults()
   {
-    var drawBuffer = new Uint8ClampedArray(Width() * Height() * 4);
+    var drawBuffer = new Uint8ClampedArray(WIDTH * HEIGHT * 4);
     
     var max = 0.0;
     var min = 0.0;
 
-    for (var y = 0; y < Height(); y++)
+    for (var y = 0; y < HEIGHT; y++)
     {
-      for (var x = 0; x < Width(); x++)
+      for (var x = 0; x < WIDTH; x++)
       {
         var cur = CanvasToWorld([x, y]);
        
@@ -106,9 +111,9 @@ function App() {
       }
     }
 
-    for (var y = 0; y < Height(); y++)
+    for (var y = 0; y < HEIGHT; y++)
     {
-      for (var x = 0; x < Width(); x++)
+      for (var x = 0; x < WIDTH; x++)
       {
         var cur = CanvasToWorld([x, y]);
        
@@ -141,16 +146,16 @@ function App() {
   function fillIsoLevels(drawBuffer)
   {
     var bufferWithIsolevels = drawBuffer.slice();
-    for (var y = 0; y < Height(); y++)
+    for (var y = 0; y < HEIGHT; y++)
     {
-      for (var x = 0; x < Width(); x++)
+      for (var x = 0; x < WIDTH; x++)
       {       
         var index = linearize(x, y);
 
         if (x > 0 && y > 0)
         {
-          var prevleftindex = (x-1 + Width() * y) * 4;
-          var prevupindex = (x + Width() * (y-1)) * 4;
+          var prevleftindex = (x-1 + WIDTH * y) * 4;
+          var prevupindex = (x + WIDTH * (y-1)) * 4;
 
           var colorChange = onColorBorder(drawBuffer, index, prevupindex, prevleftindex);
 
@@ -196,7 +201,7 @@ function App() {
 
   function linearize(x, y)
   {
-    return (x + Width() * y) * 4;
+    return (x + WIDTH * y) * 4;
   }
 
   function onColorBorder(buffer, current, up, left)
@@ -285,12 +290,12 @@ function App() {
    
   function CanvasToWorld(vec)
   {
-    return [(vec[0] - Width() * 0.5) / Width(), (vec[1] - Height() * 0.5) / Width()];
+    return [(vec[0] - WIDTH * 0.5) / WIDTH, (vec[1] - HEIGHT * 0.5) / WIDTH];
   }
 
   function WorldToCanvas(vec)
   {
-    return [(vec[0] * Width()) + Width() * 0.5, (vec[1] * Width()) + Height() * 0.5];
+    return [(vec[0] * WIDTH) + WIDTH * 0.5, (vec[1] * WIDTH) + HEIGHT * 0.5];
   }
 
   function ScreenToCanvas(sx, sy) {
